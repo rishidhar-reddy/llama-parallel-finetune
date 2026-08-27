@@ -1,5 +1,4 @@
-> **Portfolio note:** this repository preserves the original author's full commit history.
-> For what I contributed, see [PORTFOLIO.md](PORTFOLIO.md).
+> **Note:** this repository preserves the original authors' full commit history.
 > Architecture walkthrough: [docs/SYSTEM-DEEPDIVE.md](docs/SYSTEM-DEEPDIVE.md)
 
 # Llama-3 Fine‑Tuning with DDP, TP, LoRA & AdaLoRA on GLUE
