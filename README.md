@@ -1,3 +1,7 @@
+> **Portfolio note:** this repository preserves the original author's full commit history.
+> For what I contributed, see [PORTFOLIO.md](PORTFOLIO.md).
+> Architecture walkthrough: [docs/SYSTEM-DEEPDIVE.md](docs/SYSTEM-DEEPDIVE.md)
+
 # Llama-3 Fine‑Tuning with DDP, TP, LoRA & AdaLoRA on GLUE
 
 This repository demonstrates how to fine‑tune [Llama‑3](https://huggingface.co/meta-llama) style models on the [GLUE](https://gluebenchmark.com/) benchmark using **Distributed Data Parallel (DDP)**, **Tensor Parallelism (TP)** and parameter‑efficient adapters such as **LoRA** and **AdaLoRA**.  It contains training scripts, benchmarking utilities, conversion helpers and setup scripts to reproduce the experiments.
