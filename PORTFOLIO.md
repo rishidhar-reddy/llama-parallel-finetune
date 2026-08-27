@@ -39,9 +39,11 @@ say so; the three bugs found and fixed below stand on their own as a contributio
 
 ## My contributions in this repository
 
-`git log --author="Rishidhar Reddy Garlapati"`
+Verifiable with `git log --author="Rishidhar Reddy Garlapati"`. Commits are cited by subject rather than hash, since hashes change if history is ever rewritten.
 
-### Found and fixed three correctness bugs in checkpoint conversion (`afd9fb5`)
+### Found and fixed three correctness bugs in checkpoint conversion
+
+> commit `fix: three correctness bugs in DDP <-> TP checkpoint conversion`
 
 The DDP↔TP conversion utilities had no test coverage. A defect there does not raise
 during training — it produces a checkpoint that loads fine and is quietly incomplete,
@@ -63,7 +65,9 @@ legacy checkpoints.
 Verified end to end through both CLIs: a 7-row tensor sharded 4 ways now round-trips
 exactly. **0 → 34 tests, all passing.**
 
-### Documented the architecture (`<this commit>`)
+### Documented the architecture
+
+> commit `docs: add architecture deep dive and portfolio notes`
 
 A component-level deep dive covering the DDP loop, the column-parallel linear layer,
 the conversion bugs and why they were silent, and an honest gaps list.
