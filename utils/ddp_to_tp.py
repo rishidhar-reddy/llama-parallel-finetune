@@ -9,6 +9,13 @@ resulting shards are saved under `<output_dir>/tp_rank{rank}_{basename}`.
 The conversion only operates on the weight tensor shapes and does not change
 the underlying model architecture.  It is suitable for demonstrating how one
 might distribute adapter weights for tensor parallel inference.
+
+Each shard carries a reserved ``TP_META_KEY`` entry recording which keys were
+sharded and how many partitions were used, so ``tp_to_ddp.merge_shards`` can
+reassemble the checkpoint without having to guess. Guessing is not safe: a
+sharded tensor whose pieces happen to be identical -- LoRA ``B`` matrices are
+zero-initialised, so this is the common case, not a corner case -- is
+indistinguishable from a replicated one by inspection alone.
 """
 
 import argparse
@@ -18,18 +25,38 @@ from typing import Dict, List
 import torch
 
 
+TP_META_KEY = "__tp_meta__"
+
+
 def split_state_dict(state_dict: Dict[str, torch.Tensor], num_partitions: int) -> List[Dict[str, torch.Tensor]]:
     """Split weight matrices across the first dimension into `num_partitions` shards."""
+    if num_partitions < 1:
+        raise ValueError(f"num_partitions must be >= 1, got {num_partitions}")
+
     shards: List[Dict[str, torch.Tensor]] = [{} for _ in range(num_partitions)]
+    split_keys: List[str] = []
+
     for name, tensor in state_dict.items():
         if isinstance(tensor, torch.Tensor) and tensor.ndim >= 2 and tensor.shape[0] >= num_partitions:
-            chunks = torch.chunk(tensor, num_partitions, dim=0)
+            # tensor_split, not chunk: chunk returns *at most* num_partitions
+            # pieces and silently returns fewer when the rows do not divide
+            # evenly (4 rows over 3 partitions yields 2 chunks), which then
+            # raises IndexError below.
+            pieces = torch.tensor_split(tensor, num_partitions, dim=0)
             for i in range(num_partitions):
-                shards[i][name] = chunks[i].clone()
+                shards[i][name] = pieces[i].clone()
+            split_keys.append(name)
         else:
             # replicate scalar/bias and 1D tensors to all shards
             for i in range(num_partitions):
                 shards[i][name] = tensor.clone()
+
+    for shard in shards:
+        shard[TP_META_KEY] = {
+            "version": 1,
+            "num_partitions": num_partitions,
+            "split_keys": sorted(split_keys),
+        }
     return shards
 
 
